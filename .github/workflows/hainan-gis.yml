@@ -35,11 +35,15 @@ jobs:
           test -s downloads/hainan.gpkg.zip
       - name: Convert GIS layers
         run: python scripts/prepare_hainan_gis.py downloads/hainan.gpkg.zip
+      - name: Clip thematic layers to Haikou research rectangle
+        run: python scripts/prepare_haikou.py data
+      - name: Fetch independently sourced Hainan administrative outline
+        run: python scripts/fetch_hainan_boundary.py
       - name: Prepare site directory
         run: |
           mkdir -p site/data
           cp index.html site/
-          cp data/*.geojson data/data_manifest.json site/data/
+          cp data/*.geojson data/data_manifest.json data/haikou_manifest.json data/boundary_source.json site/data/
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
