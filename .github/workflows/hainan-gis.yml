@@ -1,0 +1,50 @@
+name: Build Hainan GIS Atlas
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 3 * * 1'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: hainan-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install GIS conversion libraries
+        run: python -m pip install geopandas pyogrio shapely
+      - name: Fetch official Hainan OSM data
+        run: |
+          mkdir -p downloads
+          for host in download.geofabrik.de download-ext2.geofabrik.de; do
+            if curl -fL --retry 2 --connect-timeout 20 --max-time 240 "https://$host/asia/china/hainan-latest-free.gpkg.zip" -o downloads/hainan.gpkg.zip && unzip -t downloads/hainan.gpkg.zip >/dev/null; then
+              break
+            fi
+            rm -f downloads/hainan.gpkg.zip
+          done
+          test -s downloads/hainan.gpkg.zip
+      - name: Convert GIS layers
+        run: python scripts/prepare_hainan_gis.py downloads/hainan.gpkg.zip
+      - name: Prepare site directory
+        run: |
+          mkdir -p site/data
+          cp index.html site/
+          cp data/*.geojson data/data_manifest.json site/data/
+          touch site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
