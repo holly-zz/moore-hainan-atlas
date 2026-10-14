@@ -22,3 +22,19 @@ Expected data/ output: landuse.geojson, roads.geojson, buildings.geojson, water.
 Coordinates: imported GeoJSON must use WGS84 (EPSG:4326); original source CRS is explicitly read and transformed.
 
 The browser map relies on Leaflet from a CDN; this is not fully offline. Large buildings layers may require tiling/partitioning for performance.
+
+## V3 thematic land-use classification
+
+OSM/Geofabrik data is classified from `fclass`, without guessing from geometry:
+- commercial: `commercial`, `retail`
+- residential: `residential`
+- industrial: `industrial`
+- green: `forest`, `wood`, `grass`, `meadow`, `park`, etc.
+- agriculture: `farmland`, `farmyard`, `orchard`, etc.
+- other_landuse: every remaining `fclass`, preserving original values
+
+Other independent source layers: roads, transport (traffic/transport), POI, water, buildings. Categories are thematic research groupings, **not statutory land-use zones**. True land/coastline polygon requires another verified official or OSM coastline polygon source and is not fabricated.
+
+The builder reports exact counts per output layer and any unmatched categories in `data/data_manifest.json`. If Geofabrik source naming changes, the report flags unavailable families. Large polygon or building datasets can make the browser slow: partition/simplify in a future vector-tile pipeline if necessary.
+
+Current editing capability is visibility and opacity per layer; individual vector geometry editing and save-back are **not** implemented.
