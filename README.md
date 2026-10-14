@@ -49,3 +49,11 @@ Study rectangle is **110.15–110.55 E, 19.85–20.12 N**. It is intentionally n
 - GIS build: first extract Hainan source layers, then `python scripts/prepare_haikou.py data` to intersect with the study rectangle. A separate `scripts/fetch_hainan_boundary.py` obtains a province ADM1 boundary from geoBoundaries gbOpen with attribution; this is **not** a certified shoreline polygon. No coastline-derived land polygon is supplied until a verified coastline source is processed.
 - Source providers: [Geofabrik Hainan](https://download.geofabrik.de/asia/china/hainan.html) (OSM ODbL); [geoBoundaries API](https://www.geoboundaries.org/api.html) (gbOpen CC BY 4.0). Remote access may fail; unsuccessful builds must not claim real data was produced.
 - The web UI uses CDN Leaflet, Leaflet.Draw and Turf; their availability depends on client connectivity. GitHub Pages needs enabling and an Actions workflow run to publish.
+
+## V5 POI points
+
+`scripts/prepare_poi.py` converts OSM Geofabrik `pois` point and polygon records and `transport` layers to **point** GeoJSON categories: medical, education, shopping/retail, transit, restaurants, civic services, leisure, and unmatched. Polygon features are mapped to an interior representative point, **not** a surveyed entrance. Categories follow source `fclass` labels. OSM data is contributed and incomplete: mapped features != every real-world facility.
+
+The web client displays distinct color-coded POI layers, with independent visibility and opacity toggles, click-to-inspect raw properties, and POI totals by category in exported analytics JSON. The source data manifest `data/poi_manifest.json` carries category counts and unmatched classification statistics. Attribution: © OpenStreetMap contributors (ODbL), downloaded through Geofabrik.
+
+The GitHub Actions workflow calls POI classification after Haikou clipping; no synthetic POIs are inserted. If building the atlas locally, run `python scripts/prepare_poi.py data` after `python scripts/prepare_haikou.py data`.
