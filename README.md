@@ -57,3 +57,12 @@ Study rectangle is **110.15–110.55 E, 19.85–20.12 N**. It is intentionally n
 The web client displays distinct color-coded POI layers, with independent visibility and opacity toggles, click-to-inspect raw properties, and POI totals by category in exported analytics JSON. The source data manifest `data/poi_manifest.json` carries category counts and unmatched classification statistics. Attribution: © OpenStreetMap contributors (ODbL), downloaded through Geofabrik.
 
 The GitHub Actions workflow calls POI classification after Haikou clipping; no synthetic POIs are inserted. If building the atlas locally, run `python scripts/prepare_poi.py data` after `python scripts/prepare_haikou.py data`.
+
+## V6 POI search and service radius
+
+- Search by source `name`, `fclass`, or group name; category select filters result list. The first 100 matching records are displayed while the matched total remains visible. Click an item to navigate to and select its point.
+- Clicking a point runs straight-line service coverage for **500 m, 1 km, or 3 km**. "All medical POIs" generates a combined facility service assessment.
+- Blueprints of calculation: Turf geodesic circle buffering; `intersect` of mapped residential polygon footprints against circles; union of multiple intersections *per residential polygon* to avoid counting overlapping medical service buffers twice within that feature. The numerator is overlapped OSM residential land area; denominator is mapped OSM residential polygon area in the analysis rectangle.
+- This is **not network-based access**, population coverage, health-care capacity, actual walking distance, or a complete inventory of hospitals. Polygon geometry overlaps or topology errors may affect results. The UI reports geometry operation errors; evaluate results against checked field data before publication.
+- Exported analytics JSON includes `service_coverage` when available.
+- Data will remain unavailable until the GIS workflow successfully fetches and publishes the real Geofabrik records.
