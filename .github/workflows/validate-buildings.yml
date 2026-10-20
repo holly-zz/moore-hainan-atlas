@@ -1,5 +1,11 @@
 name: Validate Haikou Four-District Buildings
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/fetch_overture_buildings.py'
+      - 'scripts/fetch_haikou_districts.py'
+      - '.github/workflows/validate-buildings.yml'
   workflow_dispatch:
 permissions:
   contents: read
