@@ -5,7 +5,7 @@ import json,urllib.request
 from pathlib import Path
 import geopandas as gpd
 from shapely.validation import make_valid
-DISTRICTS={"460105":"秀英区","460106":"龙华区","460108":"美兰区"}
+DISTRICTS={"460105":"秀英区","460106":"龙华区","460107":"琼山区","460108":"美兰区"}
 def main():
  out=Path("data");out.mkdir(exist_ok=True)
  features=[];checks=[]
@@ -27,7 +27,7 @@ def main():
    if not (108<b[0]<112 and 18<b[1]<21 and 108<b[2]<112 and 18<b[3]<21):raise RuntimeError(f"District bbox outside Hainan: {name} {b}")
    features.append({"type":"Feature","properties":{"name":name,"adcode":adcode,"source":url,"source_vintage":"2021-05","precision":"reference boundary; CRS/GCJ02 overlay needs verification"},"geometry":geom.__geo_interface__})
   checks.append({"name":name,"adcode":adcode,"features":len(g),"source":url})
- if len(features)<3:raise RuntimeError("Missing districts")
+ if len(features)<4:raise RuntimeError("Missing Haikou four districts")
  (out/"haikou_districts.geojson").write_text(json.dumps({"type":"FeatureCollection","features":features},ensure_ascii=False),encoding="utf8")
  (out/"district_manifest.json").write_text(json.dumps({"source":"DataV.GeoAtlas / AMap 2021.5","current_official":False,"districts":checks,"warning":"Not a verified current legal district boundary; positional overlay with OSM requires datum assessment"},ensure_ascii=False,indent=2),encoding="utf8")
  print(json.dumps(checks,ensure_ascii=False))
