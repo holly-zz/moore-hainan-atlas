@@ -47,5 +47,5 @@ $('maskDrawPoly').onclick=()=>status('使用地图左侧多边形绘制工具；
 function bind(){if(typeof map==='undefined'||!map){setTimeout(bind,200);return}map.on('click',e=>{if(!rectangleMode)return;const p=[e.latlng.lng,e.latlng.lat];if(!corner){corner=p;status('第一个角点已选。请点击第二个角点。');return}const [a,b]=corner;selectedArea=turf.bboxPolygon([Math.min(a,p[0]),Math.min(b,p[1]),Math.max(a,p[0]),Math.max(b,p[1])]);corner=null;rectangleMode=false;status('矩形范围已设置。点击“开启范围筛选”。')})}bind();
 const control=$('layers');if(control)control.addEventListener('change',()=>{if(!enabled)return;setTimeout(()=>{for(const k of dataKeys())previous[k]=!!states[k]?.visible;redraw()},20)});
 for(const id of ['showNone','showPOI','quickLand','quickRoad','quickPOI','quickHide']){const b=$(id);if(b)b.addEventListener('click',()=>{if(enabled)setTimeout(()=>{for(const k of dataKeys())previous[k]=!!states[k]?.visible;redraw()},20)})}
-window.spatialMask={get active(){return enabled},refresh:redraw,stop,contains};
+window.spatialMask={get active(){return enabled},refresh:()=>{if(enabled){for(const k of dataKeys())if(k.startsWith('poi_'))previous[k]=!!states[k]?.visible;redraw()}},stop,contains};
 })();
