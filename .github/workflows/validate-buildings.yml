@@ -1,0 +1,26 @@
+name: Validate Haikou Four-District Buildings
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  buildings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install geopandas pyogrio shapely overturemaps
+      - name: Fetch four-district polygon reference
+        run: python scripts/fetch_haikou_districts.py
+      - name: Download and validate Overture footprint coverage
+        run: python scripts/fetch_overture_buildings.py data
+      - uses: actions/upload-artifact@v4
+        with:
+          name: haikou-four-district-overture-buildings
+          path: |
+            data/overture_buildings_4districts.geojson
+            data/overture_buildings_manifest.json
+            data/district_manifest.json
