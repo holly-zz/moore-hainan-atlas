@@ -10,7 +10,7 @@ import pandas as pd
 GROUPS={
  "poi_health":{"hospital","clinic","doctors","dentist","pharmacy","veterinary"},
  "poi_schools":{"school","university","college","kindergarten","library"},
- "poi_retail":{"mall","supermarket","department_store","shopping_centre","shopping_center","marketplace","convenience","clothes","bakery","retail"},
+ "poi_retail":{"mall","supermarket","department_store","shopping_centre","shopping_center","marketplace","convenience","clothes","bakery","retail","books","bookshop","bookstore"},
  "poi_transit":{"bus_stop","bus_station","railway_station","train_station","station","tram_stop","subway_entrance","ferry_terminal","taxi","airport","aerodrome","parking"},
  "poi_food":{"restaurant","cafe","fast_food","food_court","bar","pub"},
  "poi_civic":{"police","fire_station","town_hall","post_office","courthouse","community_centre","place_of_worship","bank","atm"},
