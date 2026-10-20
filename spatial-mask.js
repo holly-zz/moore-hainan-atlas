@@ -8,7 +8,7 @@ ui.innerHTML=`<h2>范围筛选 / SPATIAL MASK</h2>
 <div class="sub">POI 点击仅选中点位。分析必须手动开启。范围外不绘制任何专题地物。</div>
 <label>筛选模式</label><select id="maskMode"><option value="radius">服务半径（直线）</option><option value="polygon">矢量选框 / 行政区界</option></select>
 <div id="radiusControls"><label>分析半径（km，0–10 整数）</label><div style="display:flex;gap:7px;align-items:center"><input id="maskRadius" type="range" min="0" max="10" step="1" value="1" style="flex:1;min-width:0"><input id="maskNumber" type="number" min="0" max="10" step="1" value="1" style="width:68px"> km</div></div>
-<div id="polygonControls" hidden><button id="maskUseFeature" class="wide">使用地图当前选中的面 / 区界</button><button id="maskDrawRect" class="wide">绘制矩形选框（点击两个角点）</button><button id="maskDrawPoly" class="wide">使用左侧绘制工具画多边形</button><div class="sub">真实区界需作为 GeoJSON 导入；系统不会将研究矩形伪称行政区。</div></div>
+<div id="polygonControls" hidden><label>海口行政区参考边界</label><select id="districtChoose"><option value="">请选择区界</option><option value="460105">秀英区</option><option value="460106">龙华区</option><option value="460108">美兰区</option></select><button id="districtFetch" class="wide">使用所选区界（2021 年参考数据）</button><button id="maskUseFeature" class="wide">使用地图当前选中的面 / 区界</button><button id="maskDrawRect" class="wide">绘制矩形选框（点击两个角点）</button><button id="maskDrawPoly" class="wide">使用左侧绘制工具画多边形</button><div class="sub">真实区界需作为 GeoJSON 导入；系统不会将研究矩形伪称行政区。</div></div>
 <div class="actions"><button id="maskApply" class="primary">开启范围筛选</button><button id="maskOff">退出范围筛选</button></div>
 <div id="maskStatus" class="note">尚未开启。地图仍按每个图层的独立开关显示。</div>`;
 legacy.after(ui);
@@ -42,6 +42,7 @@ for(let n=0;n<=10;n++){if(!Array.from(legacy.options).some(o=>Number(o.value)===
 $('maskRadius').oninput=e=>setRadius(e.target.value);$('maskNumber').onchange=e=>setRadius(e.target.value);
 $('maskApply').onclick=start;$('maskOff').onclick=stop;
 $('maskUseFeature').onclick=()=>{const f=geoSelected();if(!f)return status('请先选中一个真实 Polygon/MultiPolygon 地块或导入的行政区面。');selectedArea=f;status('已选中矢量范围，点击“开启范围筛选”。')};
+$('districtFetch').onclick=async()=>{const code=$('districtChoose').value;if(!code)return status('先选择秀英、龙华或美兰区。');try{const response=await fetch('./data/haikou_districts.geojson',{cache:'no-store'});if(!response.ok)throw Error('区界文件 HTTP '+response.status);const data=await response.json();const candidates=data.features.filter(f=>String(f.properties?.adcode)===code);if(!candidates.length)throw Error('区界数据不完整');selectedArea=candidates.length===1?candidates[0]:turf.union(turf.featureCollection(candidates));status('已选 '+candidates[0].properties?.name+' 参考边界。点击开启范围筛选，边界外的专题图层隐藏。注：2021 年历史边界，坐标偏移尚需核验。');if(enabled)start()}catch(e){status('区界不可用：'+e.message)}};
 $('maskDrawRect').onclick=()=>{rectangleMode=true;corner=null;status('请在地图上依次点击选框的两个对角点。')};
 $('maskDrawPoly').onclick=()=>status('使用地图左侧多边形绘制工具；完成后点击该面，并按“使用地图当前选中的面 / 区界”。');
 function bind(){if(typeof map==='undefined'||!map){setTimeout(bind,200);return}map.on('click',e=>{if(!rectangleMode)return;const p=[e.latlng.lng,e.latlng.lat];if(!corner){corner=p;status('第一个角点已选。请点击第二个角点。');return}const [a,b]=corner;selectedArea=turf.bboxPolygon([Math.min(a,p[0]),Math.min(b,p[1]),Math.max(a,p[0]),Math.max(b,p[1])]);corner=null;rectangleMode=false;status('矩形范围已设置。点击“开启范围筛选”。')})}bind();
