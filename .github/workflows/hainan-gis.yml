@@ -58,7 +58,7 @@ jobs:
           cp data/*.geojson data/data_manifest.json data/haikou_manifest.json data/poi_manifest.json data/boundary_source.json site/data/
           if [ -f data/health_accessibility.json ]; then cp data/health_accessibility.json site/data/; fi
           cp data/walk_graph.json site/data/
-          cp site-selector.js service-lens.js site/
+          cp site-selector.js spatial-mask.js site/
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
