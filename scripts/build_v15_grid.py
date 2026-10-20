@@ -83,8 +83,8 @@ def main(root='data'):
  # No minimum mapped completeness can be certified from OSM; rank is explicitly provisional.
  for r in rows:
   r['percentiles']={k:round(rank(ref[k],r['values'][k]),2) for k in METRICS}
-  r['score']=round(sum(WEIGHTS[k]*r['percentiles'][k] for k in METRICS)/sum(WEIGHTS.values()),2)
-  r['rank_status']='provisional_osm_mapping_bias'
+  r['score']=None  # FAIL CLOSED: OSM building footprint coverage not validated
+  r['rank_status']='N/A_building_coverage_not_validated'
  properties=[]
  for idx,r in enumerate(rows):
   p={'cell_id':f'HK500_{r["x"]}_{r["y"]}','grid_m':CELL,'score':r['score'],'rank_status':r['rank_status']}
@@ -92,7 +92,7 @@ def main(root='data'):
   p.update({'pctile_'+k:v for k,v in r['percentiles'].items()})
   properties.append({'type':'Feature','properties':p,'geometry':mapping(r['geometry'])})
  out.write_text(json.dumps({'type':'FeatureCollection','features':properties},ensure_ascii=False,separators=(',',':')),encoding='utf8')
- manifest={'status':'provisional','method':'Fixed 500m grid in EPSG:32649, full cells inside existing research rectangle; source metrics from OSM mapped geometry; empirical midrank percentile across same cell population','study_bbox_wgs84':STUDY_BBOX,'is_full_administrative_coverage':False,'grid_m':CELL,'cell_count':len(rows),'weights':WEIGHTS,'metrics':METRICS,'metric_direction':DIRECTION,'minmax_score_reference':'all eligible 500m cells in this version, not independent city population','reference_distribution':{k:{'min':min(v),'max':max(v),'median':statistics.median(v),'p10':sorted(v)[int(.1*(len(v)-1))],'p90':sorted(v)[int(.9*(len(v)-1))]} for k,v in ref.items()},'geometry_errors':geom_errors,'critical_warnings':['Source buildings and POIs are incompletely mapped: score is a demonstration of within-dataset ranking, NOT proven planning suitability','Building percentage measures footprint mapping, NOT FAR or actual development intensity','Transit and shopping density are mapped POI density, NOT actual demand or footfall','Partial-edge cells excluded; the old rectangle does not cover entire three districts','All indicators default positive only for algorithm smoke testing; program-specific objectives and hard exclusions are required before decision-making']}
+ manifest={'status':'N/A_pending_four_district_validation','method':'Fixed 500m grid in EPSG:32649, full cells inside existing research rectangle; source metrics from OSM mapped geometry; empirical midrank percentile across same cell population','study_bbox_wgs84':STUDY_BBOX,'is_full_administrative_coverage':False,'building_coverage_validated':False,'overall_score_validated':False,'grid_m':CELL,'cell_count':len(rows),'weights':WEIGHTS,'metrics':METRICS,'metric_direction':DIRECTION,'minmax_score_reference':'all eligible 500m cells in this version, not independent city population','reference_distribution':{k:{'min':min(v),'max':max(v),'median':statistics.median(v),'p10':sorted(v)[int(.1*(len(v)-1))],'p90':sorted(v)[int(.9*(len(v)-1))]} for k,v in ref.items()},'geometry_errors':geom_errors,'critical_warnings':['All combined scores intentionally N/A until all four districts and Overture/OSM quality gates pass','Source buildings and POIs are incompletely mapped: score is a demonstration of within-dataset ranking, NOT proven planning suitability','Building percentage measures footprint mapping, NOT FAR or actual development intensity','Transit and shopping density are mapped POI density, NOT actual demand or footfall','Partial-edge cells excluded; the old rectangle does not cover entire three districts','All indicators default positive only for algorithm smoke testing; program-specific objectives and hard exclusions are required before decision-making']}
  meta.write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf8')
- print(json.dumps({'cells':len(rows),'score_min':min(r['score'] for r in rows),'score_max':max(r['score'] for r in rows),'errors':geom_errors}))
+ print(json.dumps({'cells':len(rows),'score_min':None,'score_max':None,'errors':geom_errors}))
 if __name__=='__main__':main(sys.argv[1] if len(sys.argv)>1 else 'data')
