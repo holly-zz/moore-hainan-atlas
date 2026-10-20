@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/fetch_overture_buildings.py'
+      - 'scripts/compare_four_district_buildings.py'
       - 'scripts/fetch_haikou_districts.py'
       - '.github/workflows/validate-buildings.yml'
   workflow_dispatch:
@@ -23,6 +24,8 @@ jobs:
         run: python scripts/fetch_haikou_districts.py
       - name: Download and validate Overture footprint coverage
         run: python scripts/fetch_overture_buildings.py data
+      - name: Compare OSM with Overture on identical four districts
+        run: python scripts/compare_four_district_buildings.py data
       - uses: actions/upload-artifact@v4
         with:
           name: haikou-four-district-overture-buildings
@@ -30,3 +33,4 @@ jobs:
             data/overture_buildings_4districts.geojson
             data/overture_buildings_manifest.json
             data/district_manifest.json
+            data/building_comparison_4districts.json
