@@ -7,6 +7,7 @@ on:
       - 'scripts/compare_four_district_buildings.py'
       - 'scripts/clip_four_districts.py'
       - 'scripts/build_v15_four_grid.py'
+      - 'scripts/audit_building_spatial.py'
       - 'scripts/fetch_haikou_districts.py'
       - '.github/workflows/validate-buildings.yml'
   workflow_dispatch:
@@ -41,6 +42,8 @@ jobs:
         run: python scripts/prepare_poi.py data
       - name: Compute four-district 500m comparable cells
         run: python scripts/build_v15_four_grid.py data
+      - name: Compare spatial building coverage in 500m cells
+        run: python scripts/audit_building_spatial.py data
       - uses: actions/upload-artifact@v4
         with:
           name: haikou-four-district-overture-buildings
@@ -52,3 +55,5 @@ jobs:
             data/v15_four_district_grid.geojson
             data/v15_four_district_manifest.json
             data/four_district_clip_manifest.json
+            data/building_spatial_qa.json
+            data/building_cell_comparison.json
