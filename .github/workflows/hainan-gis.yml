@@ -43,6 +43,10 @@ jobs:
         run: python scripts/prepare_hainan_gis.py downloads/hainan.gpkg.zip
       - name: Clip thematic layers to Haikou research rectangle
         run: python scripts/prepare_haikou.py data
+      - name: Audit OSM building footprints
+        run: python scripts/audit_buildings.py data
+      - name: Retrieve Haikou district reference polygons
+        run: python scripts/fetch_haikou_districts.py
       - name: Build Haikou walking network
         run: python scripts/build_walk_graph.py data
       - name: Extract POI categories as points
@@ -59,6 +63,7 @@ jobs:
           if [ -f data/health_accessibility.json ]; then cp data/health_accessibility.json site/data/; fi
           cp data/walk_graph.json site/data/
           cp site-selector.js spatial-mask.js site/
+          cp data/building_qa.json data/district_manifest.json site/data/
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
