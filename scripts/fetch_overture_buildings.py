@@ -18,7 +18,7 @@ def main(root="data"):
  b=district.total_bounds
  bounds=",".join(str(round(float(t),6)) for t in b)
  dest=root/"overture_haikou_bbox.geojson"
- subprocess.run([sys.executable,"-m","overturemaps","download","--type=building","--bbox="+bounds,"-f","geojson","-o",str(dest)],check=True,timeout=900)
+ subprocess.run(["overturemaps","download","--type=building","--bbox="+bounds,"-f","geojson","-o",str(dest)],check=True,timeout=900)
  buildings=gpd.read_file(dest)
  if buildings.empty:raise RuntimeError("No Overture building footprints returned")
  if buildings.crs is None:buildings=buildings.set_crs(4326)
