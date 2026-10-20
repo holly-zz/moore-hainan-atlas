@@ -1,5 +1,11 @@
 name: Build Hainan GIS Atlas
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - '.github/workflows/hainan-gis.yml'
   workflow_dispatch:
   schedule:
     - cron: '20 3 * * 1'
