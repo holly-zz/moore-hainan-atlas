@@ -30,7 +30,7 @@ for(const feature of array){L.geoJSON(feature,{style:{color:colors[k]||'#666',fi
 function contains(feature){if(!mask||!feature?.geometry)return true;try{const g=feature.geometry;if(g.type==='Point')return turf.booleanPointInPolygon(feature,mask);if(g.type==='MultiPoint')return g.coordinates.some(c=>turf.booleanPointInPolygon(turf.point(c),mask));return !turf.booleanDisjoint(feature,mask)}catch(e){return false}}
 function redraw(){if(!enabled||!mask||!map)return;if(focus)map.removeLayer(focus);focus=L.featureGroup().addTo(map);let counts={},failed=0;
 const mutedKeys=new Set(['roads','buildings','commercial','residential','industrial','green','agriculture','other_landuse','water']);
-for(const k of dataKeys()){const group=layers[k];if(!group)continue;map.removeLayer(group);if(!previous[k])continue;
+for(const k of dataKeys()){const group=layers[k];if(!group)continue;map.removeLayer(group);if(!mutedKeys.has(k))continue;
   if(mutedKeys.has(k)){
     // Context stays visible in full extent as non-interactive pale outlines; never mutate the original dataset.
     L.geoJSON(group.toGeoJSON(),{interactive:false,style:{color:k==='roads'?'#b5c0be':'#b5bcb8',weight:k==='roads'?1.05:0.65,opacity:.52,fillColor:'#e4e8e4',fillOpacity:k==='roads'?0:.13}}).addTo(focus);
