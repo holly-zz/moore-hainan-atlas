@@ -27,14 +27,15 @@ else if(geom.type.includes('LineString')){const pieces=turf.lineSplit(f,turf.pol
 if(!result)return;const array=result.type==='FeatureCollection'?result.features:[result];
 for(const feature of array){L.geoJSON(feature,{style:{color:colors[k]||'#666',fillColor:colors[k]||'#666',weight:k==='roads'?2:1,fillOpacity:.65},pointToLayer:(v,ll)=>L.circleMarker(ll,{radius:5,color:'#fff',weight:1,fillColor:colors[k]||'#777',fillOpacity:1}),onEachFeature:(v,l)=>l.on('click',()=>{if(typeof pick==='function')pick(l,k)})}).addTo(target)}
 }
+function contains(feature){if(!mask||!feature?.geometry)return true;try{const g=feature.geometry;if(g.type==='Point')return turf.booleanPointInPolygon(feature,mask);if(g.type==='MultiPoint')return g.coordinates.some(c=>turf.booleanPointInPolygon(turf.point(c),mask));return !turf.booleanDisjoint(feature,mask)}catch(e){return false}}
 function redraw(){if(!enabled||!mask||!map)return;if(focus)map.removeLayer(focus);focus=L.featureGroup().addTo(map);let counts={},failed=0;
 for(const k of dataKeys()){const group=layers[k];if(!group)continue;map.removeLayer(group);if(!previous[k])continue;let n=0;group.eachLayer(l=>{try{const before=focus.getLayers().length;addPanelFeature(l.toGeoJSON(),k,focus);if(focus.getLayers().length>before)n++}catch(e){failed++}});if(n)counts[k]=n}
 L.geoJSON(mask,{style:{color:'#115c52',weight:2,dashArray:'5 4',fillOpacity:0},interactive:false}).addTo(focus);
-status('范围外的专题地物已隐藏。范围内要素：'+Object.entries(counts).map(([k,v])=>(names[k]||k)+' '+v).join(' / ')+(failed?'；几何失败 '+failed:'')+'。统计面板原有数值仍为整个研究区，不代表当前选框。');
+if(typeof refreshPOISearch==='function')refreshPOISearch();status('范围外的专题地物已隐藏。范围内要素：'+Object.entries(counts).map(([k,v])=>(names[k]||k)+' '+v).join(' / ')+(failed?'；几何失败 '+failed:'')+'。统计面板原有数值仍为整个研究区，不代表当前选框。');
 }
 function start(){if(!map||!window.turf)return status('地图或 Turf 尚未就绪');const mode=$('maskMode').value;if(mode==='polygon'){if(!selectedArea)return status('先绘制选框或选中导入的行政区面。');mask=selectedArea}else{const point=getCenter();if(!point)return status('请先选择一个 POI 或场地起点。');center=point;const r=Number($('maskRadius').value);if(r===0){mask=turf.circle(center,0.000001,{steps:32,units:'kilometers'});status('0 km 模式：只标记中心点，不显示任何范围内的面积要素。')}else mask=turf.circle(center,r,{steps:96,units:'kilometers'})}
 if(!enabled)previous=Object.fromEntries(dataKeys().map(k=>[k,!!states[k]?.visible]));enabled=true;redraw()}
-function stop(){enabled=false;mask=null;if(focus)map.removeLayer(focus);focus=null;for(const k of dataKeys()){if(!layers[k])continue;states[k].visible=!!previous[k];if(previous[k])layers[k].addTo(map);else map.removeLayer(layers[k])}if(typeof refresh==='function')refresh();status('范围分析已关闭；恢复原图层可见状态。')}
+function stop(){enabled=false;mask=null;if(focus)map.removeLayer(focus);focus=null;for(const k of dataKeys()){if(!layers[k])continue;states[k].visible=!!previous[k];if(previous[k])layers[k].addTo(map);else map.removeLayer(layers[k])}if(typeof refresh==='function')refresh();if(typeof refreshPOISearch==='function')refreshPOISearch();status('范围分析已关闭；恢复原图层可见状态。')}
 $('maskMode').onchange=()=>{$('radiusControls').hidden=$('maskMode').value!=='radius';$('polygonControls').hidden=$('maskMode').value!=='polygon';if(enabled)stop()};
 function setRadius(v){const n=Math.max(0,Math.min(10,Math.round(Number(v)||0)));$('maskRadius').value=n;$('maskNumber').value=n;legacy.value=String(n);if(enabled)start()}
 for(let n=0;n<=10;n++){if(!Array.from(legacy.options).some(o=>Number(o.value)===n)){const opt=document.createElement('option');opt.value=String(n);opt.textContent=n+' km';legacy.append(opt)}}
@@ -46,5 +47,5 @@ $('maskDrawPoly').onclick=()=>status('使用地图左侧多边形绘制工具；
 function bind(){if(typeof map==='undefined'||!map){setTimeout(bind,200);return}map.on('click',e=>{if(!rectangleMode)return;const p=[e.latlng.lng,e.latlng.lat];if(!corner){corner=p;status('第一个角点已选。请点击第二个角点。');return}const [a,b]=corner;selectedArea=turf.bboxPolygon([Math.min(a,p[0]),Math.min(b,p[1]),Math.max(a,p[0]),Math.max(b,p[1])]);corner=null;rectangleMode=false;status('矩形范围已设置。点击“开启范围筛选”。')})}bind();
 const control=$('layers');if(control)control.addEventListener('change',()=>{if(!enabled)return;setTimeout(()=>{for(const k of dataKeys())previous[k]=!!states[k]?.visible;redraw()},20)});
 for(const id of ['showNone','showPOI','quickLand','quickRoad','quickPOI','quickHide']){const b=$(id);if(b)b.addEventListener('click',()=>{if(enabled)setTimeout(()=>{for(const k of dataKeys())previous[k]=!!states[k]?.visible;redraw()},20)})}
-window.spatialMask={get active(){return enabled},refresh:redraw,stop};
+window.spatialMask={get active(){return enabled},refresh:redraw,stop,contains};
 })();
