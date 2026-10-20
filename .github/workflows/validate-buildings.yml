@@ -22,12 +22,25 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install geopandas pyogrio shapely overturemaps
+      - name: Download full Hainan OSM GPKG
+        run: |
+          mkdir -p downloads
+          curl -fL --retry 3 --connect-timeout 30 --max-time 360 https://download.geofabrik.de/asia/china/hainan-latest-free.gpkg.zip -o downloads/hainan.gpkg.zip
+          unzip -t downloads/hainan.gpkg.zip >/dev/null
+      - name: Extract full-island OSM source layers
+        run: python scripts/prepare_hainan_gis.py downloads/hainan.gpkg.zip
       - name: Fetch four-district polygon reference
         run: python scripts/fetch_haikou_districts.py
       - name: Download and validate Overture footprint coverage
         run: python scripts/fetch_overture_buildings.py data
       - name: Compare OSM with Overture on identical four districts
         run: python scripts/compare_four_district_buildings.py data
+      - name: Clip OSM thematic data to four districts
+        run: python scripts/clip_four_districts.py data
+      - name: Classify four-district POI data
+        run: python scripts/prepare_poi.py data
+      - name: Compute four-district 500m comparable cells
+        run: python scripts/build_v15_four_grid.py data
       - uses: actions/upload-artifact@v4
         with:
           name: haikou-four-district-overture-buildings
