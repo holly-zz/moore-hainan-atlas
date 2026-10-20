@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/fetch_overture_buildings.py'
       - 'scripts/compare_four_district_buildings.py'
+      - 'scripts/clip_four_districts.py'
+      - 'scripts/build_v15_four_grid.py'
       - 'scripts/fetch_haikou_districts.py'
       - '.github/workflows/validate-buildings.yml'
   workflow_dispatch:
@@ -34,3 +36,6 @@ jobs:
             data/overture_buildings_manifest.json
             data/district_manifest.json
             data/building_comparison_4districts.json
+            data/v15_four_district_grid.geojson
+            data/v15_four_district_manifest.json
+            data/four_district_clip_manifest.json
