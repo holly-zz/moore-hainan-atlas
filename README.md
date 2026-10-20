@@ -66,3 +66,12 @@ The GitHub Actions workflow calls POI classification after Haikou clipping; no s
 - This is **not network-based access**, population coverage, health-care capacity, actual walking distance, or a complete inventory of hospitals. Polygon geometry overlaps or topology errors may affect results. The UI reports geometry operation errors; evaluate results against checked field data before publication.
 - Exported analytics JSON includes `service_coverage` when available.
 - Data will remain unavailable until the GIS workflow successfully fetches and publishes the real Geofabrik records.
+
+## V8 site-selection workbench
+
+- Pick origin or destination from any selected POI, **or place a point manually** by clicking the map (school campus/entrance is not inferred). Study radius 500 m, 1 km or 3 km.
+- A lens is created by Turf geographic intersection of the real OSM land-use polygons and the selected circular area. The original land-use layers are temporarily hidden; only polygon portions **inside** the radius are colored. Unmapped regions stay uncolored.
+- Suitability scoring is an explicitly illustrative, normalized weighted combination of detected commercial, residential, and green land-use proportions, plus mapped health and transit POI counts capped at 20. User weights are normalized; users should establish independent thresholds for research claims. No missing mapped features are fabricated.
+- A preliminary pedestrian candidate graph is generated from clipped OSM roads using GEOS geometry noding and projected distances. Browser Dijkstra finds the shortest path *on this graph*. Routes may be wrong where 2D crossings are actually bridges/underpasses, road access restrictions differ, or campus entrances aren't represented. **This is not verified navigation**.
+- OSM school/station names may be incomplete or ambiguous. Choose exact source and destination from search results or mark actual entrances manually; no assumed coordinate for "Haikou Middle School".
+- To build, workflow exports `data/walk_graph.json` and copies `site-selector.js`. Geometry loading and routing depend on successful GitHub Actions execution.
