@@ -45,6 +45,8 @@ jobs:
         run: python scripts/prepare_haikou.py data
       - name: Extract POI categories as points
         run: python scripts/prepare_poi.py data
+      - name: Precompute healthcare service coverage
+        run: python scripts/analyze_health_access.py data
       - name: Fetch independently sourced Hainan administrative outline
         run: python scripts/fetch_hainan_boundary.py
       - name: Prepare site directory
@@ -52,6 +54,7 @@ jobs:
           mkdir -p site/data
           cp index.html site/
           cp data/*.geojson data/data_manifest.json data/haikou_manifest.json data/poi_manifest.json data/boundary_source.json site/data/
+          if [ -f data/health_accessibility.json ]; then cp data/health_accessibility.json site/data/; fi
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
