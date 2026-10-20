@@ -29,17 +29,18 @@ for(const feature of array){L.geoJSON(feature,{style:{color:colors[k]||'#666',fi
 }
 function contains(feature){if(!mask||!feature?.geometry)return true;try{const g=feature.geometry;if(g.type==='Point')return turf.booleanPointInPolygon(feature,mask);if(g.type==='MultiPoint')return g.coordinates.some(c=>turf.booleanPointInPolygon(turf.point(c),mask));return !turf.booleanDisjoint(feature,mask)}catch(e){return false}}
 function redraw(){if(!enabled||!mask||!map)return;if(focus)map.removeLayer(focus);focus=L.featureGroup().addTo(map);let counts={},failed=0;
+const palette=window.mooreStyle?.value?.palette||{};const cfg=window.mooreStyle?.value||{};
 const mutedKeys=new Set(['roads','buildings','commercial','residential','industrial','green','agriculture','other_landuse','water']);
 for(const k of dataKeys()){const group=layers[k];if(!group)continue;map.removeLayer(group);if(!mutedKeys.has(k))continue;
   if(mutedKeys.has(k)){
     // Context stays visible in full extent as non-interactive pale outlines; never mutate the original dataset.
-    L.geoJSON(group.toGeoJSON(),{interactive:false,style:{color:k==='roads'?'#b5c0be':'#b5bcb8',weight:k==='roads'?1.05:0.65,opacity:.52,fillColor:'#e4e8e4',fillOpacity:k==='roads'?0:.13}}).addTo(focus);
+    L.geoJSON(group.toGeoJSON(),{interactive:false,style:{color:palette.muted||'#b5bcb8',weight:k==='roads'?1.05:0.65,opacity:.52,fillColor:palette.muted||'#b5bcb8',fillOpacity:k==='roads'?0:(cfg.mutedOpacity??.18)}}).addTo(focus);
   }
 }
 for(const k of dataKeys()){const group=layers[k];if(!group||!previous[k]||k==='boundary'||k==='land'||k==='edits')continue;let n=0;
   group.eachLayer(l=>{try{const before=focus.getLayers().length;addPanelFeature(l.toGeoJSON(),k,focus);if(focus.getLayers().length>before)n++}catch(e){failed++}});if(n)counts[k]=n;
 }
-L.geoJSON(mask,{style:{color:'#145e54',weight:2.5,dashArray:'7 5',fillOpacity:0},interactive:false}).addTo(focus);
+L.geoJSON(mask,{style:{color:palette.mask||'#145e54',weight:2.5,dashArray:'7 5',fillOpacity:0},interactive:false}).addTo(focus);
 if(typeof refreshPOISearch==='function')refreshPOISearch();
 status('分析范围内彩色专题：'+Object.entries(counts).map(([k,v])=>(names[k]||k)+' '+v).join(' / ')+(failed?'；几何运算异常 '+failed:'')+'。范围外保留浅灰建筑、道路、土地利用轮廓；POI 范围外隐藏。右侧原统计仍为整个研究区。');
 }
