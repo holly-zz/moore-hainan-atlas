@@ -38,6 +38,8 @@ jobs:
         run: python tests/prepare_real_haikou_500m.py
       - name: Generate real Haikou 500m .blend file
         run: blender --background --factory-startup --python scripts/import_site_blender.py -- test-output/haikou-school-500m-real-overture.json test-output/haikou-school-500m-real.blend
+      - name: Check GLB export binary
+        run: test -s test-output/haikou-school-500m-real.glb
       - name: Verify real scene contains building meshes
         run: blender --background --factory-startup --python tests/verify_real_blender_scene.py -- test-output/haikou-school-500m-real.blend
       - uses: actions/upload-artifact@v4
@@ -47,5 +49,6 @@ jobs:
             test-output/site.blend
             tests/blender_smoke_synthetic.json
             test-output/haikou-school-500m-real.blend
+            test-output/haikou-school-500m-real.glb
             test-output/haikou-school-500m-real-overture.json
             test-output/site_source_report.json
