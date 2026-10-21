@@ -18,4 +18,3 @@ $('blenderGenerate').onclick=async()=>{const button=$('blenderGenerate');button.
 const poll=document.createElement('button');poll.id='blenderPoll';poll.className='wide';poll.textContent='刷新 Blender 生成进度';poll.hidden=true;$('blenderInfo').after(poll);
 poll.onclick=async()=>{if(!activeJob)return;try{const r=await fetch(url+'/jobs/'+activeJob);if(!r.ok)throw Error('查询失败');const d=await r.json();$('blenderInfo').textContent='任务 '+activeJob+' · '+d.status+(d.error?'：'+d.error:'');if(d.status==='completed'){$('blenderDownload').href=url+'/jobs/'+activeJob+'/site.blend';$('blenderDownload').style.display='block';poll.hidden=true}}catch(e){$('blenderInfo').textContent='状态获取失败：'+e.message}};
 })();
-})();
