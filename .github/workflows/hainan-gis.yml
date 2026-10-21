@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install GIS conversion libraries
-        run: python -m pip install geopandas pyogrio shapely pandas
+        run: python -m pip install geopandas pyogrio shapely pandas overturemaps
       - name: Validate Blender bridge scripts
         run: |
           python -m py_compile scripts/local_blender_bridge.py scripts/import_site_blender.py
@@ -58,6 +58,8 @@ jobs:
         run: python scripts/prepare_poi.py data
       - name: Compute V15 grid scores
         run: python scripts/build_v15_grid.py data
+      - name: Overture buildings 500m school candidate pilot
+        run: python scripts/prepare_overture_500m_pilot.py
       - name: Precompute healthcare service coverage
         run: python scripts/analyze_health_access.py data
       - name: Fetch independently sourced Hainan administrative outline
@@ -70,7 +72,7 @@ jobs:
           if [ -f data/health_accessibility.json ]; then cp data/health_accessibility.json site/data/; fi
           cp data/walk_graph.json site/data/
           cp site-selector.js spatial-mask.js map-style-studio.js site-evaluation.js poi-icons.js guided-analysis.js v15-grid.js blender-bridge.js site/
-          cp data/building_qa.json data/district_manifest.json data/v15_grid_manifest.json site/data/
+          cp data/building_qa.json data/district_manifest.json data/v15_grid_manifest.json data/pilot_overture_manifest.json site/data/
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
