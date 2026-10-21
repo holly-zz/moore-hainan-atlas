@@ -30,6 +30,10 @@ jobs:
           python-version: '3.11'
       - name: Install GIS conversion libraries
         run: python -m pip install geopandas pyogrio shapely pandas
+      - name: Validate Blender bridge scripts
+        run: |
+          python -m py_compile scripts/local_blender_bridge.py scripts/import_site_blender.py
+          node --check blender-bridge.js
       - name: Fetch official Hainan OSM data
         run: |
           mkdir -p downloads
