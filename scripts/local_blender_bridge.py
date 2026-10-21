@@ -31,7 +31,7 @@ def build(job_id,exe):
   result=subprocess.run([exe,"--background","--factory-startup","--python",str(BASE/"scripts/import_site_blender.py"),"--",str(work/"scene.json"),str(work/"site.blend")],capture_output=True,text=True,timeout=480,check=False)
   (work/"blender.log").write_text((result.stdout+"\n"+result.stderr)[-18000:],encoding="utf8")
   if result.returncode or not (work/"site.blend").is_file() or not (work/"site.glb").is_file():raise RuntimeError("Blender failed, see job log")
-  with lock:jobs[job_id].update(status="completed",file="site.blend")
+  with lock:jobs[job_id].update(status="completed",file="site.blend",glb_ready=(work/"site.glb").is_file())
  except Exception as e:
   with lock:jobs[job_id].update(status="failed",error=str(e))
 class Handler(BaseHTTPRequestHandler):
