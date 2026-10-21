@@ -15,10 +15,10 @@ $('blenderExport').onclick=()=>{try{const payload=prepare();const out=payload.la
 async function enrichOverturePilot(payload){
  const center=[110.302509,20.029762];
  const p=turf.point(center);
- const bounds=turf.bbox(payload.selection);
- const corners=[[bounds[0],bounds[1]],[bounds[0],bounds[3]],[bounds[2],bounds[1]],[bounds[2],bounds[3]]];
- // Static 500m test tile: never apply beyond its measured radius.
- if(corners.some(c=>turf.distance(p,turf.point(c),{units:'kilometers'})>.505))return;
+ let outside=false;
+ // Only accept selection coordinates within this static 500m Overture pilot.
+ turf.coordEach(payload.selection,c=>{if(turf.distance(p,turf.point(c),{units:'kilometers'})>.515)outside=true});
+ if(outside)return;
  try{
   const response=await fetch('./data/pilot_overture_500m.geojson');
   if(!response.ok)return;
