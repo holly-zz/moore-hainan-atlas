@@ -37,6 +37,7 @@ jobs:
           node --check idol-residence-agent.js
           node --check idol-tutorial.js
           node --check idol-auto-discovery.js
+          node --check idol-semi-selection.js
       - name: Fetch official Hainan OSM data
         run: |
           mkdir -p downloads
@@ -74,7 +75,7 @@ jobs:
           cp data/*.geojson data/data_manifest.json data/haikou_manifest.json data/poi_manifest.json data/boundary_source.json site/data/
           if [ -f data/health_accessibility.json ]; then cp data/health_accessibility.json site/data/; fi
           cp data/walk_graph.json site/data/
-          cp site-selector.js spatial-mask.js map-style-studio.js site-evaluation.js poi-icons.js guided-analysis.js v15-grid.js blender-bridge.js idol-residence-agent.js idol-tutorial.js idol-auto-discovery.js site/
+          cp site-selector.js spatial-mask.js map-style-studio.js site-evaluation.js poi-icons.js guided-analysis.js v15-grid.js blender-bridge.js idol-residence-agent.js idol-tutorial.js idol-auto-discovery.js idol-semi-selection.js site/
           cp data/building_qa.json data/district_manifest.json data/v15_grid_manifest.json data/pilot_overture_manifest.json site/data/
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
