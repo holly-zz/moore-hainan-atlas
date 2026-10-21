@@ -1,8 +1,8 @@
 /* Export selected AOI as a source-based Blender scene GIS bundle. */
 (()=>{
 const panel=document.querySelector('main > aside');if(!panel)return;
-const section=document.createElement('section');section.innerHTML='<h2>08 / GIS → BLENDER</h2><div class="sub">使用上方矢量选框或行政区选择；导出真实 GIS 地物。建筑没有 height/levels 时只生成平面轮廓，绝不虚构高度。</div><button id="blenderConnect" class="wide">检测本地 Blender 桥接服务</button><button id="blenderGenerate" class="primary wide">直接生成 Blender 模型</button><button id="blenderExport" class="wide">备用：下载场地 JSON 数据包</button><a id="blenderDownload" class="wide" href="#" style="display:none">下载生成的 .blend 模型</a><div id="blenderInfo" class="note">请先绘制或选择范围。导出为 JSON，可使用仓库中的 Blender 导入脚本生成模型。</div>';panel.append(section);
-const $=id=>document.getElementById(id);
+const section=document.createElement('section');section.innerHTML='<h2>08 / GIS → BLENDER</h2><div class="sub">使用上方矢量选框或行政区选择；导出真实 GIS 地物。建筑没有 height/levels 时只生成平面轮廓，绝不虚构高度。</div><button id="blenderConnect" class="wide">检测本地 Blender 桥接服务</button><button id="blenderGenerate" class="primary wide">直接生成 Blender 模型</button><button id="blenderExport" class="wide">备用：下载场地 JSON 数据包</button><a id="blenderDownload" class="wide" href="#" style="display:none">下载生成的 .blend 模型</a><a id="glbDownload" class="wide" href="#" style="display:none">下载可预览 .glb</a><div id="blender3dSlot" style="display:none"><model-viewer id="blender3d" camera-controls auto-rotate shadow-intensity="0.7" style="width:100%;height:300px;background:#ebefec"></model-viewer><div class="sub">当前建筑缺乏可信高度，仅显示真实轮廓平面或有来源的高度。</div></div><div id="blenderInfo" class="note">请先绘制或选择范围。导出为 JSON，可使用仓库中的 Blender 导入脚本生成模型。</div>';panel.append(section);
+const $=id=>document.getElementById(id);const viewerScript=document.createElement('script');viewerScript.type='module';viewerScript.src='https://unpkg.com/@google/model-viewer@4.1.0/dist/model-viewer.min.js';document.head.append(viewerScript);
 function prepare(){
  const mask=window.mooreBlenderTestSelection||window.spatialMask?.area;if(!mask)throw Error('尚无选框。先到范围筛选绘制矩形/选中多边形。');
  if(!window.turf)throw Error('Turf 载入失败');
