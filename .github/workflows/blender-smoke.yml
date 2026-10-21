@@ -1,0 +1,40 @@
+name: Blender Real Scene Smoke Test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/import_site_blender.py'
+      - 'scripts/local_blender_bridge.py'
+      - 'tests/**'
+      - '.github/workflows/blender-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  blender-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install actual Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender
+          blender --version
+      - name: Create labeled synthetic 500m-area geometry fixture
+        run: python tests/create_blender_smoke_fixture.py
+      - name: Convert real GIS schema into Blender scene
+        run: |
+          mkdir -p test-output
+          blender --background --factory-startup --python scripts/import_site_blender.py -- tests/blender_smoke_synthetic.json test-output/site.blend
+      - name: Validate saved .blend geometry by reopening in Blender
+        run: blender --background --factory-startup --python tests/verify_blender_scene.py -- test-output/site.blend
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-scene-smoke-test-synthetic
+          path: |
+            test-output/site.blend
+            tests/blender_smoke_synthetic.json
