@@ -22,7 +22,7 @@ jobs:
       - name: Install actual Blender
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
           blender --version
       - name: Create labeled synthetic 500m-area geometry fixture
         run: python tests/create_blender_smoke_fixture.py
