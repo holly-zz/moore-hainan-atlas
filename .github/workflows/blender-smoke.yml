@@ -32,9 +32,20 @@ jobs:
           blender --background --factory-startup --python scripts/import_site_blender.py -- tests/blender_smoke_synthetic.json test-output/site.blend
       - name: Validate saved .blend geometry by reopening in Blender
         run: blender --background --factory-startup --python tests/verify_blender_scene.py -- test-output/site.blend
+      - name: Install geospatial dependencies
+        run: python -m pip install geopandas pyogrio shapely overturemaps
+      - name: Retrieve real 500m Overture footprint data
+        run: python tests/prepare_real_haikou_500m.py
+      - name: Generate real Haikou 500m .blend file
+        run: blender --background --factory-startup --python scripts/import_site_blender.py -- test-output/haikou-school-500m-real-overture.json test-output/haikou-school-500m-real.blend
+      - name: Verify real scene contains building meshes
+        run: blender --background --factory-startup --python tests/verify_real_blender_scene.py -- test-output/haikou-school-500m-real.blend
       - uses: actions/upload-artifact@v4
         with:
           name: blender-scene-smoke-test-synthetic
           path: |
             test-output/site.blend
             tests/blender_smoke_synthetic.json
+            test-output/haikou-school-500m-real.blend
+            test-output/haikou-school-500m-real-overture.json
+            test-output/site_source_report.json
