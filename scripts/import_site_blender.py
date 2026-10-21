@@ -67,3 +67,11 @@ preview=out.with_suffix('.glb')
 bpy.ops.export_scene.gltf(filepath=str(preview),export_format='GLB',use_selection=False)
 if not preview.exists() or preview.stat().st_size==0:raise RuntimeError('GLB export missing')
 print('GLB saved',str(preview.resolve()))
+
+
+try:
+ glb=out.with_suffix('.glb')
+ bpy.ops.export_scene.gltf(filepath=str(glb.resolve()), export_format='GLB', export_apply=True)
+ print('Saved GLB', str(glb.resolve()))
+except Exception as e:
+ print('GLB_EXPORT_FAILED:',str(e))
