@@ -1,0 +1,41 @@
+name: Blender 500m Real Geometry Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare_blender_500m_test.py'
+      - 'scripts/import_site_blender.py'
+      - '.github/workflows/blender-500m-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blender-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Blender and GIS dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender
+          python -m pip install geopandas pyogrio shapely pyproj
+          blender --version | head -2
+      - name: Prepare 500m real GIS study package
+        run: python scripts/prepare_blender_500m_test.py
+      - name: Build actual .blend using background Blender
+        run: |
+          blender --background --factory-startup --python scripts/import_site_blender.py -- blender_test/scene.json blender_test/site.blend
+          test -s blender_test/site.blend
+      - name: Re-open model and verify Blender geometry
+        run: |
+          blender --background blender_test/site.blend --python-expr "import bpy,json; from pathlib import Path; m={c.name:len(c.objects) for c in bpy.data.collections}; assert sum(m.values())>0, 'No geometry'; Path('blender_test/scene_qa.json').write_text(json.dumps({'object_count':len(bpy.data.objects),'collections':m},indent=2)); print('ACCEPTANCE',m)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: haikou-school-500m-real-blender-smoketest
+          path: blender_test/
+          retention-days: 30
