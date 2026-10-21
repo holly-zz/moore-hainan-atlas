@@ -61,3 +61,9 @@ bpy.context.scene['SOURCE_WARNING']='No building heights were inferred; polygons
 out.parent.mkdir(parents=True,exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(out.resolve()))
 print('Saved',str(out.resolve()))
+
+# Portable preview of the identical Blender scene. This does not add invented heights.
+preview=out.with_suffix('.glb')
+bpy.ops.export_scene.gltf(filepath=str(preview),export_format='GLB',use_selection=False)
+if not preview.exists() or preview.stat().st_size==0:raise RuntimeError('GLB export missing')
+print('GLB saved',str(preview.resolve()))
