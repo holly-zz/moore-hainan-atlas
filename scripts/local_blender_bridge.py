@@ -30,7 +30,7 @@ def build(job_id,exe):
   with lock:jobs[job_id]["status"]="running"
   result=subprocess.run([exe,"--background","--factory-startup","--python",str(BASE/"scripts/import_site_blender.py"),"--",str(work/"scene.json"),str(work/"site.blend")],capture_output=True,text=True,timeout=480,check=False)
   (work/"blender.log").write_text((result.stdout+"\n"+result.stderr)[-18000:],encoding="utf8")
-  if result.returncode or not (work/"site.blend").is_file():raise RuntimeError("Blender failed, see job log")
+  if result.returncode or not (work/"site.blend").is_file() or not (work/"site.glb").is_file():raise RuntimeError("Blender failed, see job log")
   with lock:jobs[job_id].update(status="completed",file="site.blend")
  except Exception as e:
   with lock:jobs[job_id].update(status="failed",error=str(e))
@@ -55,10 +55,10 @@ class Handler(BaseHTTPRequestHandler):
    with lock:job=dict(jobs.get(parts[1]) or {})
    if not job:return self.send(404,{"error":"Job not found"})
    if len(parts)==2:return self.send(200,job)
-   if len(parts)==3 and parts[2] in ("site.blend","scene.json","blender.log") and job.get("status")=="completed":
+   if len(parts)==3 and parts[2] in ("site.blend","site.glb","scene.json","blender.log") and job.get("status")=="completed":
     file=ROOT/parts[1]/parts[2]
     if not file.is_file():return self.send(404,{"error":"File unavailable"})
-    data=file.read_bytes();self.send_response(200);self.cors();self.send_header("Content-Type","application/octet-stream");self.send_header("Content-Disposition",'attachment; filename="'+parts[2]+'"');self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data);return
+    data=file.read_bytes();self.send_response(200);self.cors();self.send_header("Content-Type","model/gltf-binary" if parts[2]=="site.glb" else "application/octet-stream");self.send_header("Content-Disposition",'attachment; filename="'+parts[2]+'"');self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data);return
   return self.send(404,{"error":"Not found"})
  def do_POST(self):
   if not self.allowed():return self.send(403,{"error":"Origin not allowed"})
