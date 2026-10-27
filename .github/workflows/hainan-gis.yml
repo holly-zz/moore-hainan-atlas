@@ -39,6 +39,7 @@ jobs:
           node --check idol-auto-discovery.js
           node --check idol-semi-selection.js
           node --check parcel-entry-lab.js
+          node scripts/test_parcel_entry_lab.js
       - name: Fetch official Hainan OSM data
         run: |
           mkdir -p downloads
